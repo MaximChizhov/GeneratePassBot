@@ -46,3 +46,14 @@ def answer_callback_query(callback_query_id: str, text: str = None):
 
     response = requests.post(url, json=payload)
     return response.json()
+
+
+def delete_message(chat_id: int, message_id: int):
+    url = f"https://api.telegram.org/bot{config.BOT_TOKEN}/deleteMessage"
+    payload = {
+        "chat_id": chat_id,
+        "message_id": message_id
+    }
+
+    response = requests.post(url, json=payload)
+    return response.json()

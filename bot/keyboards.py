@@ -1,52 +1,56 @@
 def main_menu():
-    markup = {
+    return {
         "keyboard": [
             [{"text": "🔐 Сгенерировать пароль"}],
             [{"text": "ℹ️ Помощь"}]
         ],
         "resize_keyboard": True
     }
-    return markup
 
 
 def back_button():
-    markup = {
+    return {
         "keyboard": [
             [{"text": "⬅️ Назад"}]
         ],
         "resize_keyboard": True
     }
-    return markup
 
 
 def password_options_menu(current_settings):
-    markup = {
-        "inline_keyboard": [
-            # Длина пароля - отдельная строка
-            [{"text": f"📏 Длина пароля: {current_settings['length']}", "callback_data": "length_display"}],
+    inline_keyboard = []
 
-            # Кнопки - и + на одной строке
-            [
-                {"text": "➖ Уменьшить", "callback_data": "length_decr"},
-                {"text": "➕ Увеличить", "callback_data": "length_incr"}
-            ],
+    # Длина пароля
+    inline_keyboard.append([
+        {"text": f"📏 Длина пароля: {current_settings['length']}", "callback_data": "length_display"}
+    ])
 
-            # Чекбоксы
-            *[
-                [{
-                    "text": f"{'✅' if current_settings[key] else '❌'} {text}",
-                    "callback_data": f"toggle_{key}"
-                }]
-                for key, text in {
-                    "use_uppercase": "🔠 Большие буквы",
-                    "use_lowercase": "🔡 Маленькие буквы",
-                    "use_digits": "🔢 Цифры",
-                    "use_special": "🔣 Символы"
-                }.items()
-            ],
+    # Кнопки изменения длины
+    inline_keyboard.append([
+        {"text": "➖ Уменьшить", "callback_data": "length_decr"},
+        {"text": "➕ Увеличить", "callback_data": "length_incr"}
+    ])
 
-            # Кнопка генерации
-            [{"text": "🎲 Сгенерировать пароль", "callback_data": "generate_password"}]
-        ]
+    # Чекбоксы
+    options = {
+        "use_uppercase": "🔠 Большие буквы",
+        "use_lowercase": "🔡 Маленькие буквы",
+        "use_digits": "🔢 Цифры",
+        "use_special": "🔣 Символы"
     }
-    return markup
+
+    for key, text in options.items():
+        icon = "✅" if current_settings[key] else "❌"
+        inline_keyboard.append([
+            {"text": f"{icon} {text}", "callback_data": f"toggle_{key}"}
+        ])
+
+    # Кнопки генерации
+    inline_keyboard.append([
+        {"text": "🎲 Сгенерировать 1 пароль", "callback_data": "generate_single"}
+    ])
+    inline_keyboard.append([
+        {"text": "🚀 Сгенерировать 10 паролей", "callback_data": "generate_multiple"}
+    ])
+
+    return {"inline_keyboard": inline_keyboard}

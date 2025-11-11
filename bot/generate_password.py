@@ -1,5 +1,6 @@
 import random
 import string
+import math
 from bot.config import config
 
 
@@ -12,42 +13,80 @@ class PasswordGenerator:
 
     def generate_password(self, settings: dict) -> str:
         characters = ""
+        required_sets = []
 
+        # Собираем доступные символы и обязательные типы
         if settings['use_uppercase']:
             characters += self.uppercase
+            required_sets.append(self.uppercase)
         if settings['use_lowercase']:
             characters += self.lowercase
+            required_sets.append(self.lowercase)
         if settings['use_digits']:
             characters += self.digits
+            required_sets.append(self.digits)
         if settings['use_special']:
             characters += self.special
+            required_sets.append(self.special)
 
         # Если ничего не выбрано, используем буквы и цифры по умолчанию
         if not characters:
             characters = self.lowercase + self.digits
+            required_sets = [self.lowercase, self.digits]
 
-        # Генерируем пароль
-        password = ''.join(random.choice(characters) for _ in range(settings['length']))
+        # Создаем список для пароля
+        password = []
 
-        # Проверяем, что пароль содержит хотя бы один символ из каждого выбранного типа
-        if settings['use_uppercase'] and not any(c in self.uppercase for c in password):
-            password = self._ensure_character_type(password, self.uppercase, settings)
-        if settings['use_lowercase'] and not any(c in self.lowercase for c in password):
-            password = self._ensure_character_type(password, self.lowercase, settings)
-        if settings['use_digits'] and not any(c in self.digits for c in password):
-            password = self._ensure_character_type(password, self.digits, settings)
-        if settings['use_special'] and not any(c in self.special for c in password):
-            password = self._ensure_character_type(password, self.special, settings)
+        # На первые позиции ставим по одному символу из каждого обязательного типа
+        for i, char_set in enumerate(required_sets):
+            if i < settings['length']:  # Проверяем, что длина пароля позволяет
+                password.append(random.choice(char_set))
 
-        return password
+        # Заполняем оставшиеся позиции случайными символами из общего набора
+        remaining_length = settings['length'] - len(password)
+        if remaining_length > 0:
+            password.extend(random.choices(characters, k=remaining_length))
 
-    def _ensure_character_type(self, password: str, char_set: str, settings: dict) -> str:
-        """Гарантирует, что пароль содержит хотя бы один символ из указанного набора"""
-        password_list = list(password)
-        # Заменяем случайный символ на символ из нужного набора
-        index = random.randint(0, len(password_list) - 1)
-        password_list[index] = random.choice(char_set)
-        return ''.join(password_list)
+        # Перемешиваем пароль для случайности
+        random.shuffle(password)
+
+        return ''.join(password)
+
+    def calculate_entropy(self, settings: dict) -> float:
+        """Рассчитывает энтропию пароля в битах"""
+        charset_size = 0
+
+        if settings['use_lowercase']:
+            charset_size += 26
+        if settings['use_uppercase']:
+            charset_size += 26
+        if settings['use_digits']:
+            charset_size += 10
+        if settings['use_special']:
+            charset_size += len(self.special)
+
+        if charset_size == 0:
+            return 0
+
+        entropy = settings['length'] * math.log2(charset_size)
+        return round(entropy, 1)
+
+    def get_strength_rating(self, entropy: float) -> tuple:
+        """Возвращает оценку надежности и цвет"""
+        if entropy < 28:
+            return ("Очень слабый", "🔴")
+        elif entropy < 36:
+            return ("Слабый", "🟠")
+        elif entropy < 60:
+            return ("Средний", "🟡")
+        elif entropy < 80:
+            return ("Сильный", "🟢")
+        else:
+            return ("Очень сильный", "🔵")
+
+    def generate_multiple_passwords(self, settings: dict, count: int = 10) -> list:
+        """Генерирует несколько паролей"""
+        return [self.generate_password(settings) for _ in range(count)]
 
 
 password_generator = PasswordGenerator()
