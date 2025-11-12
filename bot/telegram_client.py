@@ -16,17 +16,19 @@ def get_updates(offset: int = 0, timeout: int = 3):
         return json.loads(data)
 
 
-def send_message(chat_id: int, text: str, reply_markup=None):
+def send_message(chat_id: int, text: str, parse_mode: str = None, reply_markup=None):
     url = f"https://api.telegram.org/bot{config.BOT_TOKEN}/sendMessage"
     payload = {
         "chat_id": chat_id,
         "text": text,
     }
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
     if reply_markup:
         payload["reply_markup"] = reply_markup
 
-    data = json.dumps(payload).encode('utf-8')
-    headers = {'Content-Type': 'application/json'}
+    data = json.dumps(payload).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
 
     request = urllib.request.Request(url, data=data, headers=headers)
 

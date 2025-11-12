@@ -5,6 +5,7 @@ from bot.settings import get_user_settings
 from bot.handlers.handler import Handler, HandlerStatus
 from bot.keyboards import main_menu
 from bot.generate_password import password_generator
+import html
 
 
 def delete_message_after_delay(chat_id: int, message_id: int, delay: int = 15):
@@ -48,7 +49,7 @@ class GenerateHandler(Handler):
 
         # Формируем список паролей
         password_list = "\n\n".join([
-            f"{i + 1}. {password}" for i, password in enumerate(passwords)
+            f"{i + 1}. <pre>{html.escape(password)}</pre>" for i, password in enumerate(passwords)
         ])
 
         # Создаем текст сообщения
@@ -61,7 +62,7 @@ class GenerateHandler(Handler):
         )
 
         # Отправляем сообщение
-        result = telegram_client.send_message(chat_id, password_text, reply_markup=main_menu())
+        result = telegram_client.send_message(chat_id, password_text, parse_mode="HTML", reply_markup=main_menu())
         telegram_client.answer_callback_query(callback_query["id"])
 
         # Удаляем сообщение через 15 секунд
