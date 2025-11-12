@@ -8,8 +8,6 @@ from bot.generate_password import password_generator
 
 
 def delete_message_after_delay(chat_id: int, message_id: int, delay: int = 15):
-    """Удаляет сообщение через указанное количество секунд"""
-
     def delete():
         time.sleep(delay)
         telegram_client.delete_message(chat_id, message_id)
