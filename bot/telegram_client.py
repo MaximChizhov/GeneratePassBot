@@ -1,12 +1,19 @@
-import requests
+import urllib.request
+import urllib.parse
+import json
 from bot.config import config
 
 
-def get_updates(offset: int = 0, timeout: int = 30):
+def get_updates(offset: int = 0, timeout: int = 3):
     url = f"https://api.telegram.org/bot{config.BOT_TOKEN}/getUpdates"
     params = {"offset": offset, "timeout": timeout}
-    response = requests.get(url, params=params)
-    return response.json()
+
+    query_string = urllib.parse.urlencode(params)
+    full_url = f"{url}?{query_string}"
+
+    with urllib.request.urlopen(full_url) as response:
+        data = response.read().decode('utf-8')
+        return json.loads(data)
 
 
 def send_message(chat_id: int, text: str, reply_markup=None):
@@ -14,13 +21,18 @@ def send_message(chat_id: int, text: str, reply_markup=None):
     payload = {
         "chat_id": chat_id,
         "text": text,
-        "parse_mode": "HTML"
     }
     if reply_markup:
         payload["reply_markup"] = reply_markup
 
-    response = requests.post(url, json=payload)
-    return response.json()
+    data = json.dumps(payload).encode('utf-8')
+    headers = {'Content-Type': 'application/json'}
+
+    request = urllib.request.Request(url, data=data, headers=headers)
+
+    with urllib.request.urlopen(request) as response:
+        result = json.loads(response.read().decode('utf-8'))
+        return result
 
 
 def edit_message_text(chat_id: int, message_id: int, text: str, reply_markup=None):
@@ -29,13 +41,17 @@ def edit_message_text(chat_id: int, message_id: int, text: str, reply_markup=Non
         "chat_id": chat_id,
         "message_id": message_id,
         "text": text,
-        "parse_mode": "HTML"
     }
     if reply_markup:
         payload["reply_markup"] = reply_markup
 
-    response = requests.post(url, json=payload)
-    return response.json()
+    data = json.dumps(payload).encode('utf-8')
+    headers = {'Content-Type': 'application/json'}
+
+    request = urllib.request.Request(url, data=data, headers=headers)
+
+    with urllib.request.urlopen(request) as response:
+        return json.loads(response.read().decode('utf-8'))
 
 
 def answer_callback_query(callback_query_id: str, text: str = None):
@@ -44,8 +60,13 @@ def answer_callback_query(callback_query_id: str, text: str = None):
     if text:
         payload["text"] = text
 
-    response = requests.post(url, json=payload)
-    return response.json()
+    data = json.dumps(payload).encode('utf-8')
+    headers = {'Content-Type': 'application/json'}
+
+    request = urllib.request.Request(url, data=data, headers=headers)
+
+    with urllib.request.urlopen(request) as response:
+        return json.loads(response.read().decode('utf-8'))
 
 
 def delete_message(chat_id: int, message_id: int):
@@ -55,5 +76,10 @@ def delete_message(chat_id: int, message_id: int):
         "message_id": message_id
     }
 
-    response = requests.post(url, json=payload)
-    return response.json()
+    data = json.dumps(payload).encode('utf-8')
+    headers = {'Content-Type': 'application/json'}
+
+    request = urllib.request.Request(url, data=data, headers=headers)
+
+    with urllib.request.urlopen(request) as response:
+        return json.loads(response.read().decode('utf-8'))

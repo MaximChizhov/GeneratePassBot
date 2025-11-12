@@ -1,7 +1,6 @@
 import random
 import string
 import math
-from bot.config import config
 
 
 class PasswordGenerator:

@@ -9,9 +9,9 @@ class HandlerStatus(Enum):
 
 class Handler(ABC):
     @abstractmethod
-    def can_handle(self, update: dict, state: str, user_data: dict) -> bool:
+    def can_handle(self, update: dict) -> bool:
         pass
 
     @abstractmethod
-    def handle(self, update: dict, state: str, user_data: dict) -> HandlerStatus:
+    def handle(self, update: dict) -> HandlerStatus:
         pass

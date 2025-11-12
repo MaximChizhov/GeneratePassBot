@@ -8,7 +8,7 @@ def start_long_polling(dispatcher: Dispatcher) -> None:
     print("Бот запущен...")
 
     while True:
-        updates = bot.telegram_client.get_updates(offset=next_update_offset)
+        updates = bot.telegram_client.get_updates(offset=next_update_offset, timeout=3)
         for update in updates.get("result", []):
             next_update_offset = max(next_update_offset, update["update_id"] + 1)
             dispatcher.dispatch(update)

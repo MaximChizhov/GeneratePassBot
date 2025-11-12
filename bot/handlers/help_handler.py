@@ -4,14 +4,14 @@ from bot.handlers.handler import Handler, HandlerStatus
 
 
 class HelpHandler(Handler):
-    def can_handle(self, update: dict, state: str, user_data: dict) -> bool:
+    def can_handle(self, update: dict) -> bool:
         if "message" not in update:
             return False
 
         message = update["message"]
         return "text" in message and message["text"] == "ℹ️ Помощь"
 
-    def handle(self, update: dict, state: str, user_data: dict) -> HandlerStatus:
+    def handle(self, update: dict) -> HandlerStatus:
         message = update["message"]
         chat_id = message["chat"]["id"]
 

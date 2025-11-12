@@ -50,7 +50,7 @@ def password_options_menu(current_settings):
         {"text": "🎲 Сгенерировать 1 пароль", "callback_data": "generate_single"}
     ])
     inline_keyboard.append([
-        {"text": "🚀 Сгенерировать 10 паролей", "callback_data": "generate_multiple"}
+        {"text": "🎲 Сгенерировать 10 паролей", "callback_data": "generate_multiple"}
     ])
 
     return {"inline_keyboard": inline_keyboard}

@@ -1,25 +1,10 @@
 import threading
 import time
-from bot.config import config
-from bot.keyboards import password_options_menu, main_menu
 from bot import telegram_client
+from bot.settings import get_user_settings
 from bot.handlers.handler import Handler, HandlerStatus
+from bot.keyboards import main_menu
 from bot.generate_password import password_generator
-
-# Временное хранилище настроек пользователей
-user_settings = {}
-
-
-def get_user_settings(user_id):
-    if user_id not in user_settings:
-        user_settings[user_id] = {
-            'length': config.DEFAULT_LENGTH,
-            'use_uppercase': True,
-            'use_lowercase': True,
-            'use_digits': True,
-            'use_special': False
-        }
-    return user_settings[user_id]
 
 
 def delete_message_after_delay(chat_id: int, message_id: int, delay: int = 15):
@@ -34,85 +19,41 @@ def delete_message_after_delay(chat_id: int, message_id: int, delay: int = 15):
     thread.start()
 
 
-class GeneratePasswordHandler(Handler):
-    def can_handle(self, update: dict, state: str, user_data: dict) -> bool:
-        if "message" not in update:
+class GenerateHandler(Handler):
+    def can_handle(self, update: dict) -> bool:
+        if "callback_query" not in update:
             return False
 
-        message = update["message"]
-        return "text" in message and message["text"] == "🔐 Сгенерировать пароль"
+        callback_data = update["callback_query"]["data"]
+        return callback_data in ["generate_single", "generate_multiple"]
 
-    def handle(self, update: dict, state: str, user_data: dict) -> HandlerStatus:
-        message = update["message"]
-        chat_id = message["chat"]["id"]
-        settings = get_user_settings(chat_id)
-
-        telegram_client.send_message(
-            chat_id,
-            "⚙️ Настрой параметры пароля:",
-            reply_markup=password_options_menu(settings)
-        )
-        return HandlerStatus.STOP
-
-
-class CallbackHandler(Handler):
-    def can_handle(self, update: dict, state: str, user_data: dict) -> bool:
-        return "callback_query" in update
-
-    def handle(self, update: dict, state: str, user_data: dict) -> HandlerStatus:
+    def handle(self, update: dict) -> HandlerStatus:
         callback_query = update["callback_query"]
         user_id = callback_query["from"]["id"]
         message = callback_query["message"]
         chat_id = message["chat"]["id"]
-        message_id = message["message_id"]
-        callback_data = callback_query["data"]
 
         settings = get_user_settings(user_id)
-
-        if callback_data == "length_incr" and settings['length'] < config.MAX_LENGTH:
-            settings['length'] += 1
-        elif callback_data == "length_decr" and settings['length'] > config.MIN_LENGTH:
-            settings['length'] -= 1
-        elif callback_data.startswith("toggle_"):
-            key = callback_data.replace("toggle_", "")
-            settings[key] = not settings[key]
-        elif callback_data in ["generate_single", "generate_multiple"]:
-            self._handle_password_generation(callback_query, settings, callback_data)
-            return HandlerStatus.STOP
-
-        # Обновляем сообщение с новыми настройками
-        telegram_client.edit_message_text(
-            chat_id,
-            message_id,
-            "⚙️ Настрой параметры пароля:",
-            reply_markup=password_options_menu(settings)
-        )
-        telegram_client.answer_callback_query(callback_query["id"])
-        return HandlerStatus.STOP
-
-    def _handle_password_generation(self, callback_query, settings, generate_type):
-        """Обрабатывает генерацию паролей"""
-        message = callback_query["message"]
-        chat_id = message["chat"]["id"]
+        callback_data = callback_query["data"]
 
         # Рассчитываем энтропию для оценки надежности
         entropy = password_generator.calculate_entropy(settings)
         strength, color = password_generator.get_strength_rating(entropy)
 
         # Генерируем пароли
-        if generate_type == "generate_single":
+        if callback_data == "generate_single":
             passwords = [password_generator.generate_password(settings)]
             title = "🔐 Сгенерированный пароль:"
         else:  # generate_multiple
             passwords = password_generator.generate_multiple_passwords(settings, 10)
             title = "🔐 10 сгенерированных паролей:"
 
-        # Формируем список паролей (БЕЗ кавычек)
+        # Формируем список паролей
         password_list = "\n\n".join([
             f"{i + 1}. {password}" for i, password in enumerate(passwords)
         ])
 
-        # Создаем текст сообщения (БЕЗ энтропии)
+        # Создаем текст сообщения
         password_text = (
             f"{title}\n\n"
             f"{password_list}\n\n"
@@ -128,3 +69,5 @@ class CallbackHandler(Handler):
         # Удаляем сообщение через 15 секунд
         if "result" in result and "message_id" in result["result"]:
             delete_message_after_delay(chat_id, result["result"]["message_id"], 15)
+
+        return HandlerStatus.STOP

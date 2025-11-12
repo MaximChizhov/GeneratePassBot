@@ -9,11 +9,8 @@ class Dispatcher:
         self.handlers.extend(handlers)
 
     def dispatch(self, update: dict) -> None:
-        state = "main"  # Пока не используем, но оставляем для будущего
-        user_data = {}  # Пока не используем, но оставляем для будущего
-
         for handler in self.handlers:
-            if handler.can_handle(update, state, user_data):
-                result = handler.handle(update, state, user_data)
+            if handler.can_handle(update):
+                result = handler.handle(update)
                 if result == HandlerStatus.STOP:
                     break
