@@ -5,7 +5,7 @@ load_dotenv()
 
 
 class Config:
-    BOT_TOKEN = os.getenv('BOT_TOKEN')
+    BOT_TOKEN = os.getenv("BOT_TOKEN")
 
     # Настройки паролей
     DEFAULT_LENGTH = 12

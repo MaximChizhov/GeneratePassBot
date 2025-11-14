@@ -12,7 +12,7 @@ def get_updates(offset: int = 0, timeout: int = 3):
     full_url = f"{url}?{query_string}"
 
     with urllib.request.urlopen(full_url) as response:
-        data = response.read().decode('utf-8')
+        data = response.read().decode("utf-8")
         return json.loads(data)
 
 
@@ -33,7 +33,7 @@ def send_message(chat_id: int, text: str, parse_mode: str = None, reply_markup=N
     request = urllib.request.Request(url, data=data, headers=headers)
 
     with urllib.request.urlopen(request) as response:
-        result = json.loads(response.read().decode('utf-8'))
+        result = json.loads(response.read().decode("utf-8"))
         return result
 
 
@@ -48,12 +48,12 @@ def edit_message_text(chat_id: int, message_id: int, text: str, reply_markup=Non
         payload["reply_markup"] = reply_markup
 
     data = json.dumps(payload).encode('utf-8')
-    headers = {'Content-Type': 'application/json'}
+    headers = {"Content-Type": "application/json"}
 
     request = urllib.request.Request(url, data=data, headers=headers)
 
     with urllib.request.urlopen(request) as response:
-        return json.loads(response.read().decode('utf-8'))
+        return json.loads(response.read().decode("utf-8"))
 
 
 def answer_callback_query(callback_query_id: str, text: str = None):
@@ -62,8 +62,8 @@ def answer_callback_query(callback_query_id: str, text: str = None):
     if text:
         payload["text"] = text
 
-    data = json.dumps(payload).encode('utf-8')
-    headers = {'Content-Type': 'application/json'}
+    data = json.dumps(payload).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
 
     request = urllib.request.Request(url, data=data, headers=headers)
 
@@ -78,10 +78,10 @@ def delete_message(chat_id: int, message_id: int):
         "message_id": message_id
     }
 
-    data = json.dumps(payload).encode('utf-8')
-    headers = {'Content-Type': 'application/json'}
+    data = json.dumps(payload).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
 
     request = urllib.request.Request(url, data=data, headers=headers)
 
     with urllib.request.urlopen(request) as response:
-        return json.loads(response.read().decode('utf-8'))
+        return json.loads(response.read().decode("utf-8"))

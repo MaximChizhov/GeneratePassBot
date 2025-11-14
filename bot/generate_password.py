@@ -15,16 +15,16 @@ class PasswordGenerator:
         required_sets = []
 
         # Собираем доступные символы и обязательные типы
-        if settings['use_uppercase']:
+        if settings["use_uppercase"]:
             characters += self.uppercase
             required_sets.append(self.uppercase)
-        if settings['use_lowercase']:
+        if settings["use_lowercase"]:
             characters += self.lowercase
             required_sets.append(self.lowercase)
-        if settings['use_digits']:
+        if settings["use_digits"]:
             characters += self.digits
             required_sets.append(self.digits)
-        if settings['use_special']:
+        if settings["use_special"]:
             characters += self.special
             required_sets.append(self.special)
 
@@ -38,11 +38,11 @@ class PasswordGenerator:
 
         # На первые позиции ставим по одному символу из каждого обязательного типа
         for i, char_set in enumerate(required_sets):
-            if i < settings['length']:  # Проверяем, что длина пароля позволяет
+            if i < settings["length"]:  # Проверяем, что длина пароля позволяет
                 password.append(random.choice(char_set))
 
         # Заполняем оставшиеся позиции случайными символами из общего набора
-        remaining_length = settings['length'] - len(password)
+        remaining_length = settings["length"] - len(password)
         if remaining_length > 0:
             password.extend(random.choices(characters, k=remaining_length))
 
@@ -52,26 +52,24 @@ class PasswordGenerator:
         return ''.join(password)
 
     def calculate_entropy(self, settings: dict) -> float:
-        """Рассчитывает энтропию пароля в битах"""
         charset_size = 0
 
-        if settings['use_lowercase']:
+        if settings["use_lowercase"]:
             charset_size += 26
-        if settings['use_uppercase']:
+        if settings["use_uppercase"]:
             charset_size += 26
-        if settings['use_digits']:
+        if settings["use_digits"]:
             charset_size += 10
-        if settings['use_special']:
+        if settings["use_special"]:
             charset_size += len(self.special)
 
         if charset_size == 0:
             return 0
 
-        entropy = settings['length'] * math.log2(charset_size)
+        entropy = settings["length"] * math.log2(charset_size)
         return round(entropy, 1)
 
     def get_strength_rating(self, entropy: float) -> tuple:
-        """Возвращает оценку надежности и цвет"""
         if entropy < 28:
             return ("Очень слабый", "🔴")
         elif entropy < 36:
@@ -84,7 +82,6 @@ class PasswordGenerator:
             return ("Очень сильный", "🔵")
 
     def generate_multiple_passwords(self, settings: dict, count: int = 10) -> list:
-        """Генерирует несколько паролей"""
         return [self.generate_password(settings) for _ in range(count)]
 
 

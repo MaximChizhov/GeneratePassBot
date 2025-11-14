@@ -49,7 +49,7 @@ class GenerateHandler(Handler):
 
         # Формируем список паролей
         password_list = "\n\n".join([
-            f"{i + 1}. <pre>{html.escape(password)}</pre>" for i, password in enumerate(passwords)
+            f"<pre>{html.escape(password)}</pre>" for i, password in enumerate(passwords)
         ])
 
         # Создаем текст сообщения

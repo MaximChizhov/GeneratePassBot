@@ -23,10 +23,10 @@ class LengthHandler(Handler):
         settings = get_user_settings(user_id)
         callback_data = callback_query["data"]
 
-        if callback_data == "length_incr" and settings['length'] < config.MAX_LENGTH:
-            settings['length'] += 1
-        elif callback_data == "length_decr" and settings['length'] > config.MIN_LENGTH:
-            settings['length'] -= 1
+        if callback_data == "length_incr" and settings["length"] < config.MAX_LENGTH:
+            settings["length"] += 1
+        elif callback_data == "length_decr" and settings["length"] > config.MIN_LENGTH:
+            settings["length"] -= 1
 
         telegram_client.edit_message_text(
             chat_id,
